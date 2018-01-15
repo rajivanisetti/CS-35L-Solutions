@@ -352,6 +352,55 @@ After this, I scrolled to the bottom and found the following file that is the ol
 
 -rwxr-xr-x   1 root root   18692 Jan 26  2014 libgpg-error.so.0.10.0
 
+10)
+
+After using the command "man locale" I found that the locale command's data depends on the environment variables such as LC_CTYPE, LC_NUMERIC, etc.
+
+11)
+
+After entering emacs, we can search for commands using C-h a "keyword" then using the keyword "sort" to find commands with sort in the name. I found the following commands.
+
+Buffer-menu-sort
+sort-columns
+sort-fields
+sort-lines
+sort-numeric-fields
+sort-pages
+sort-paragraphs
+sort-regexp-fields
+tabulated-list-col-sort
+tabulated-list-sort
+
+12)
+
+After entering emacs, I used the C-h b command, switched buffers using C-x o, and then searched for "C-M-a" using the C-s search command. I found the following descriptions.
+
+C-M-a           beginning-of-defun: Move backward to the beginning of a defun.
+C-M-b           backward-sexp: Move backward across one balanced expression (sexp).
+C-M-c           exit-recursive-edit: Exit from the innermost recursive edit or minibuffer.
+C-M-d           down-list: Move forward down one level of parentheses.
+C-M-e           end-of-defun: Move forward to next end of defun.
+C-M-f           forward-sexp: Move forward across one balanced expression (sexp).
+C-M-h           mark-defun: Put mark at end of this defun, point at beginning.
+
+13)
+
+After using the C-h b command again in emacs and searching for "C-g" using the C-s search command, I found that C-g is the command for "keyboard-quit. The function of this is to Signal a ‘quit’ condition. During execution of Lisp code, this character causes a quit directly. At top-level, as an editor command, this simply beeps.
+
+14) 
+
+After using the C-h b command again in emacs and searching for "yank" using the C-s search command,
+I found that the "yank" function reinserts the last stretch of killed text. More precisely, it reinserts the most recent kill, which is the stretch of killed text most recently killed OR yanked.
+
+15)
+
+After comparing the output from using the "ls -l" command and going into emacs and using "C-x d" and switching the directory to /usr/bin, the only differences I noticed was that the dired command displayed used and available memory at the beginning, while ls did not. In addition, the dired command also appended the following two files at the beginning. 
+
+dr-xr-xr-x.   2 root root       81920 Dec 28 13:15 .
+drwxr-xr-x.  16 root root        4096 Dec  5  2016 ..
+
+It seems that dired does not ignore entries starting with ".", almost like the "ls -l -a" command. Finally, ls listed the number of files found, while dired did not.
+
 
 
 
