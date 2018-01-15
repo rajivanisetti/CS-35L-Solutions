@@ -119,15 +119,15 @@ C-s - < ! C-b C-b C-b C-SP C-n C-e M-w C-r L a b C-n C-n C-y
 
 5. 
 
-C-s + + C-p C-b C-b M-> C-w 
+C-s + + C-p C-b C-b C-SP M-> C-w 
 
 6.
 
-C-_ C-_ C-_ 
+C-y
 
 7.
 
-< ! - - M-> - - > 
+C-r + + C-p C-a < ! - - M-> - - > 
 
 8.
 
@@ -217,11 +217,11 @@ C-x b Enter
 
 M - : SP ( - SP x SP y ) C-j
 
-(This gives me back the same evalution but also gives me back a hexidecimal and octadecimal values for the number.)
+(This gives me back the same evaluation but also gives me back a hexidecimal and octadecimal values for the number.)
 
 6.
 
-(There is no way that these numbers can be truly random. Emacs must be using some sort of algorithm, whether based on time or some other factor to generate these "random" numbers. Because it uses some method, it violates the idea of being truly random. In addition, the numbers generated must be within some threshold due to memory capacity. Finally, after looking through the emacs manual, it stated that the numbers are "pesudo-random", as no computer can generate a truly random number. Thus, it is impossible for these numbers to be truly random.)
+There is no way that these numbers can be truly random. Emacs must be using some sort of algorithm, whether based on time or some other factor to generate these "random" numbers. Because it uses some method, it violates the idea of being truly random. In addition, the numbers generated must be within some threshold due to memory capacity. Finally, after looking through the emacs manual, it stated that the numbers are "pseudo-random", as no computer can generate a truly random number. Thus, it is impossible for these numbers to be truly random.
 
 7.
 

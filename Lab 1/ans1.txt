@@ -30,13 +30,13 @@ After using the "man chmod" command, the manual for chmod gave me the following 
 
 After using "man find", I searched the manual for find and found that one could use the following command to access files modified in the last 3 weeks.
 
-find -ctime -21
+find -mtime -21
 
 7)
 
 After using the "man find" command and searching the manual for "find", I found that I could use the following command to find the directories.
 
-find / -type d -ctime -21
+find / -type d -mtime -21
 
 8)
 
@@ -340,7 +340,7 @@ I received the following output.
 /usr/bin/cancel
 /usr/bin/etags
 
-This corresponds to 193 files. 
+This corresponds to 293 files. 
 
 9)
 
