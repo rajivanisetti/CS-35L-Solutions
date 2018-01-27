@@ -1,0 +1,39 @@
+First, I set my locale to the standard C locale, using the following command: export LC_ALL="C".
+
+Then, I sorted the file specified in the assignment page and placed the sorted file in my working directory using the following command: sort /usr/share/dict/words > words
+
+After this, I downloaded the html for the assignment page using wget in the following command: wget http://web.cs.ucla.edu/classes/winter18/cs35L/assign/assign2.html
+
+I then switched the contents of this to a text file, using the following mv command.
+mv assign2.html assign2.txt
+
+I used the following command, as the assignment page stated: tr -c 'A-Za-z' '[\n*]' < assign2.txt
+
+I noticed that this command essentially split up each of the words (I presume that contain characters from A-Z or a-z), and put many newlines between them, the number of newlines varied. It seems that the number of newlines was correlated with the non-A-Z and non-a-z characters, regarding how many characters and which characters they were. All in all, it seems the command split up the text file into only english alphabet characters and issued newlines depending on all other characters.
+
+I then used the following command, as the assignment page stated: tr -cs 'A-Za-z' '[\n*]' < assign2.txt
+
+It seems that this command did the same as the previous command. However, in this case the command deleted all of the surplus newlines and put each string of English alphabet on its own line without any surplus whitespace after. 
+
+I then used the following command, as the assignment page stated: tr -cs 'A-Za-z' '[\n*]' < assign2.txt | sort 
+
+The reason that I put the "sort" keyword after is so that the command has a file to sort. If I were to put "< assign2.txt" at the end as I did with the previous commands, the sort would not sort as intended. I noticed this because I did it incorrectly the first time, and fixed it. 
+
+It seems that this output sorted the previous output, so that we can see the file with all duplicates in sorted order. In essence, this command takes all English letters and words and puts them on a new line in sorted order. 
+
+After this, I invoked the next command in the same manner: tr -cs 'A-Za-z' '[\n*]' < assign2.txt | sort -u
+
+The difference between the output of this command and the previous is that this command used the "unique" -u option and took out all duplicates. From this, we have a list of every English word or letter in the html document in sorted order without any duplicates. 
+
+I then tried the following command to compare its output: tr -cs 'A-Za-z' '[\n*]' < assign2.txt | sort -u | comm - words
+
+This command outputted a plethora of words. After doing some research on the "comm" command, I realized that it printed three "columns", the first column was lines unique standard input, but for us this is the file given by the command tr -cs 'A-Za-z' '[\n*]' < assign2.txt | sort -u. The second column was lines unique to the file "words", and the third column was lines that were common to both files. 
+
+I then tried the following command to compare its output: tr -cs 'A-Za-z' '[\n*]' < assign2.txt | sort -u | comm -23 - words
+
+This command only outputted lines unique to the file given by the command tr -cs 'A-Za-z' '[\n*]' < assign2.txt | sort -u, or standard input. This is because the flag -23 supresses the second and third columns. 
+
+
+
+
+
