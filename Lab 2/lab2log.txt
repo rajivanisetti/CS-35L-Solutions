@@ -33,6 +33,221 @@ I then tried the following command to compare its output: tr -cs 'A-Za-z' '[\n*]
 
 This command only outputted lines unique to the file given by the command tr -cs 'A-Za-z' '[\n*]' < assign2.txt | sort -u, or standard input. This is because the flag -23 supresses the second and third columns. 
 
+I then started the portion of the lab with regards to the Hawaiian dictionary. First, I used wget http://mauimapp.com/moolelo/hwnwdseng.htm to download the html file. I then used emacs to start writing my bash script.
+
+I started off my script with the trademark shebag: #!/bin/bash
+
+The following is my bash script with comments explaining each command.
+
+#!/bin/bash                                                                                                                       
+
+# My bash script                                                                                                                  
+
+#Extract all table entries                                                                                                        
+
+grep '<td>.\{1,\}</td>' |
+
+#Delete all odd entries                                                                                                       
+
+sed -n '2~2p' |
+
+#Delete all <tr> and </tr> tagging around words                                                                               
+
+sed 's/<td>//g;s/<\/td>//g' |
+
+#Delete all leading spaces                                                                                                    
+
+sed 's/^\s*//g' |
+
+#Convert all uppercase characters to lowercase                                                                                
+
+tr [:upper:] [:lower:] |
+
+#Delete all <u> and </u> tags                                                                                                 
+
+sed 's/<u>//g;s/<\/u>//g' |
+
+#Treat all ` as if it is a '                                                                                                  
+
+sed "s/\`/\'/g" |
+
+#Treat a comma and then a space between words or a space between words as 2 words and replace them with newlines 
+
+sed "s/,\s/\n/g;s/\s/\n/g" |
+
+#Take out any invalid Hawaiian words without the special Hawaiian characters                                                  
+
+grep "^[pk\'mnwlhaeiou]\{1,\}$" |
+
+#Finally, sort and remove duplicates                                                                                          
+
+sort -u
+
+#end of bash script
+
+--------------------------------------------------
+
+After this, I put the script's output into a file called hwords using the command cat hwnwdseng.htm | ./buildwords > hwords
+
+I used the following command to check how many words on the assignment page were mispelled in Hawaiian:
+
+tr [:upper:] [:lower:] < assign2.txt | tr -cs "pk\'mnwlhaeiou" "[\n*]" | sort -u | comm -23 - hwords | wc -l
+
+It output the number 198, so there were 198 mispelled Hawaiian words on the assignment page. 
+
+In terms of English mispellings, I used the following command to check:
+
+tr [:upper:] [:lower:] < assign2.txt | tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - words | wc -l
+
+This command output 39, so there were 39 mispelled English words. 
+
+I used the following command to put those mispelled English words in a file named misspelledEnglish:
+
+tr [:upper:] [:lower:] < assign2.txt | tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - words > misspellEnglish
+
+After this, I used the following command to find words mispelled in English but not Hawaiian.
+
+tr [:upper:] [:lower:] < misspellEnglish | tr -cs "pk\'mnwlhaeiou" "[\n*]" | sort -u | comm -12 - hwords
+
+Here are the words:
+
+e
+halau
+i
+lau
+po
+wiki
+
+I then used the following command to put mispelled Hawaiian words into a file name misspelledHawaiian:
+
+tr [:upper:] [:lower:] < assign2.txt | tr -cs "pk\'mnwlhaeiou" "[\n*]" | sort -u | comm -23 - hwords > misspelledHawaiian
+
+I then used the following command to find words mispelled in Hawaiian but not English:
+
+tr [:upper:] [:lower:] < misspelledHawaiian | tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -12 - words
+
+The words are:
+
+a
+ail
+ain
+ake
+al
+ale
+alen
+all
+amine
+amp
+ample
+an
+aph
+awk
+e
+ea
+ee
+el
+em
+emp
+en
+ep
+epa
+h
+ha
+han
+hap
+hawaiian
+he
+hei
+hell
+hem
+hen
+hi
+hin
+ho
+how
+howe
+ia
+ie
+ii
+ile
+imp
+in
+ion
+iou
+k
+keep
+kin
+l
+lan
+le
+lea
+li
+like
+line
+link
+ln
+lo
+lowe
+m
+mail
+man
+me
+men
+mi
+ml
+mo
+mp
+n
+name
+ne
+nee
+no
+non
+nu
+num
+o
+om
+on
+one
+op
+ope
+open
+own
+p
+paul
+pe
+pell
+people
+plea
+pu
+u
+ui
+ula
+ule
+ume
+ump
+un
+uni
+w
+wa
+wan
+we
+wh
+wha
+who
+wi
+wo
+
+
+
+
+
+
+
+
+
+
+
 
 
 
