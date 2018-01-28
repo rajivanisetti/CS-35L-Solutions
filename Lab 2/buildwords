@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# My bash script
+
+#Extract all table entries
+
+grep '<td>.\{1,\}</td>' |
+
+    
+    #Delete all odd entries
+    
+    sed -n '2~2p' |
+
+    #Delete all <tr> and </tr> tagging around words
+
+    sed 's/<td>//g;s/<\/td>//g' |
+
+    #Delete all leading spaces
+
+    sed 's/^\s*//g' |
+
+    #Convert all uppercase characters to lowercase
+
+    tr [:upper:] [:lower:] |
+
+    #Delete all <u> and </u> tags
+
+    sed 's/<u>//g;s/<\/u>//g' |
+
+    #Treat all ` as if it is a '
+
+    sed "s/\`/\'/g" |
+
+    #Treat a comma and then a space between words or a space between words as 2 words and replace them with newlines
+
+    sed "s/,\s/\n/g;s/\s/\n/g" |
+
+    #Take out any invalid Hawaiian words without the special Hawaiian characters
+    
+    grep "^[pk\'mnwlhaeiou]\{1,\}$" |
+
+    #Finally, sort and remove duplicates
+
+    sort -u
+    
+
+
+
