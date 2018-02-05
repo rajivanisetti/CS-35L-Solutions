@@ -1,0 +1,71 @@
+The first thing I did was download and install the Coreutils 7.6 package, using the following commands.
+
+wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-7.6.tar.gz
+
+tar -xzvf coreutils-7.6.tar.gz
+
+I decided now to make a new directory to place my Coreutils install, using the following command.
+
+mkdir coreUtilsLoc
+
+I then navigated to the Coreutils directory in my home directory and used the following command to install it to the directory I just created.
+
+./configure --prefix=/u/cs/ugrad/rajiv/coreUtilsLoc
+
+I then used the following commands to install Coreutils from the makefile.
+
+make
+make install
+
+Now we have finally installed Coreutils into my specified directory. I navigate to this directory and find only 3 directories inside: bin, lib, and share.
+
+I navigated to the bin directory, and used the ls command found in there and saw that the bug was prevalent. I used the following commands.
+
+cd bin
+./ls -l /bin/bash
+
+And from this I got the following output.
+
+-rwxr-xr-x 1 root root 960632 2017-08-03 06:36 /bin/bash
+
+Clearly, the date has an incorrect format. In order to fix this, I first navigated back to the coreutils-7.6 directory. Then, I copied and pasted the patch linked to by the assignment page into a file called mypatch.diff. From there, I used the following command to add the patch.
+
+patch -p1 < mypatch.diff
+
+The patch was appended and I used emacs to verify that the files were changed accordingly. 
+
+I then navigated back to the coreutils-7.6 directory and used the "make" command to install the patch.
+
+After this, I verified that the patch worked on the Coreutils package that I had just downloaded. I used the following commands.
+
+Pre-patch: ./coreUtilsLoc/bin/ls -l ./coreutils-7.6.tar.gz 
+
+Output: -rw-r--r-- 1 rajiv csugrad 10014650 2018-02-04 18:50 ./coreutils-7.6.tar.gz
+
+Post-patch: ./coreutils-7.6/src/ls -l ./coreutils-7.6.tar.gz 
+
+Output: -rw-r--r-- 1 rajiv csugrad 10014650 Feb  4 18:50 ./coreutils-7.6.tar.gz
+
+It is clear that the patch worked and we have the correct date format. I then checked on a file that was over a year old. I used the following touch command on the Coreutils package to change the date to May 16, 2010 00:00. 
+
+touch -t 201005160000 coreutils-7.6.tar.gz
+
+I then reran the previous commands to check if the patch worked.
+
+Pre-patch: ./coreUtilsLoc/bin/ls -l ./coreutils-7.6.tar.gz 
+
+Output: -rw-r--r-- 1 rajiv csugrad 10014650 2010-05-16 00:00 ./coreutils-7.6.tar.gz
+
+Post-patch: ./coreutils-7.6/src/ls -l ./coreutils-7.6.tar.gz 
+
+Output: -rw-r--r-- 1 rajiv csugrad 10014650 May 16  2010 ./coreutils-7.6.tar.gz
+
+Evidently, the patch still works!
+
+
+
+
+
+
+
+
