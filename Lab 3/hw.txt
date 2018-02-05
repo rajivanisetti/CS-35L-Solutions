@@ -1,0 +1,39 @@
+1)
+
+The line "case_long_iso_time_style:" was a label that was used in a goto from the original code in a for loop. However, because Brady also removed the for loop that utilizes this goto, it would have been safe to leave it in the code, as it would have never been called to. However, this would have been redundant. 
+
+2)
+
+This would indeed cause problems for a company that has international clients. If these clients were unaccustomed to reading US dates, it would hinder comprehension from the users. In effect, it would be incogruous with other date formats used in other applications with different locales, as this patch only utilizes the English speaking locale. Thus, this is only an effective and safe patch if your company ONLY has English clients, as it only caters to the English locale. 
+
+3)
+
+After downloading the randline.py file using wget, and invoking it on the /dev/null directory. I get the following output/error.
+
+Traceback (most recent call last):
+  File "./randline.py", line 70, in <module>
+    main()
+  File "./randline.py", line 64, in main
+    sys.stdout.write(generator.chooseline())
+  File "./randline.py", line 34, in chooseline
+    return random.choice(self.lines)
+  File "/usr/lib64/python2.7/random.py", line 274, in choice
+    return seq[int(self.random() * len(seq))]  # raises IndexError if seq is empty
+IndexError: list index out of range
+
+The error we receive is an IndexError. The reason for this is that the file is empty. Thus, trying to access any line/index is out of range and would result in undefined behavior. It is clear that the code tries to access a line in the file given by the index [int(self.random() * len(seq))]. This index, or any index for that matter is out of range and gives us the IndexError.
+
+4)
+
+To run the script in python 3, I invoked the following command:
+
+python3 ./randline.py /dev/null
+
+I received the following syntax error.
+
+File "./randline.py", line 65
+    except IOError as (errno, strerror):
+                      ^
+SyntaxError: invalid syntax
+
+The reason for this syntax error is that Python 3 has a different error syntax than Python 2. After some research, I found that the line in question should be changed to "except IOError as err:" to favor the "explicit is better than implicit" philosophies of Python. 
