@@ -19,6 +19,10 @@ make install
 
 Now we have finally installed Coreutils into my specified directory. I navigate to this directory and find only 3 directories inside: bin, lib, and share.
 
+I then changed my locale to produce the bug using the following command.
+
+export LC_ALL='en_US.UTF-8'
+
 I navigated to the bin directory, and used the ls command found in there and saw that the bug was prevalent. I used the following commands.
 
 cd bin

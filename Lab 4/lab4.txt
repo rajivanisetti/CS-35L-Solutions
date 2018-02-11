@@ -1,0 +1,159 @@
+The first thing I did was download the Coreutils package with the bug in it using the following command.
+
+wget http://web.cs.ucla.edu/classes/winter18/cs35L/assign/coreutils-with-bug.tar.gz
+
+I then unzipped the file and switched to the directory and utilized the configure and make commands. The commands used are as follows.
+
+tar -xzvf coreutils-with-bug.tar.gz
+cd coreutils-with-bug
+./configure
+make
+
+However, I received the following error. 
+
+In file included from utimecmp.c:41:0:
+utimens.h:2:5: error: conflicting types for 'futimens'
+ int futimens (int, char const *, struct timespec const [2]);
+     ^~~~~~~~
+In file included from utimecmp.h:25:0,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was here
+ extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+            ^~~~~~~~
+make[3]: *** [Makefile:659: utimecmp.o] Error 1
+make[3]: Leaving directory '/w/home.11/cs/ugrad/rajiv/coreutils-with-bug/lib'
+make[2]: *** [Makefile:414: all] Error 2
+make[2]: Leaving directory '/w/home.11/cs/ugrad/rajiv/coreutils-with-bug/lib'
+make[1]: *** [Makefile:419: all-recursive] Error 1
+make[1]: Leaving directory '/w/home.11/cs/ugrad/rajiv/coreutils-with-bug'
+make: *** [Makefile:357: all] Error 2
+
+To fix this, I downloaded the patch on the assignment page and patched the package using the following commands.
+
+wget http://web.cs.ucla.edu/classes/winter18/cs35L/assign/coreutils.diff
+patch -p0 < coreutils.diff 
+
+The following files were patched.
+
+patching file lib/utimens.c
+patching file lib/utimens.h
+patching file src/copy.c
+patching file src/tee.c
+patching file src/touch.c
+
+After this, I utilized the make command again and had no errors this time. It seems that the underlying problem was the name of the function "futimens" in the pre-patch version. There were type conflicts and renaming the function by adding "coreutils" before it fixed this problem. All the patch did was rename the function and adjust all calls to the function. 
+
+After this, I attempted to reproduce the problem given by the spec. I used the following commands, which were essentially the commands given by the spec, but with my own coreutils bug directory. 
+
+$ tmp=$(mktemp -d)
+$ cd $tmp
+$ touch -d '1918-11-11 11:00 GMT' wwi-armistice
+$ touch now
+$ sleep 1
+$ touch now1
+$ TZ=UTC0 ~/coreutils-with-bug/src/ls ls -lt --full-time wwi-armistice now now1
+
+And I recieved the following output.
+
+-rw-r--r-- 1 rajiv csugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 rajiv csugrad 0 2018-02-11 20:08:23.592005396 +0000 now1
+-rw-r--r-- 1 rajiv csugrad 0 2018-02-11 20:08:14.608855470 +0000 now
+
+It is clear the the bug is apparent. The file from "1918" is being output first, indicating it is newer than the later files, which is obviously incorrect. To try and understand why this error is occurring, I enter the gdb debugger. First I changed to the coreutils-with-bug/src directory and then entered gdb on the ls command and found information on the functions using the following commands.
+
+cd ~/coreutils-with-bug/src
+gdb ls
+(gdb) info functions
+
+I found a function that appears to sort the files called sort_files that is obviously notable. I decide to run the ls command using the same arguments as before but using gdb this time and setting a breakpoint on this function. Here are the commands I used. 
+
+cd
+cd $tmp
+gdb ~/coreutils-with-bug/src/ls
+break sort_files
+run -lt --full-time wwi-armistice now now1
+
+The debugger then reached a breakpoint, where I then used the "(gdb) s" command to step through the functions. I recieved the following output. 
+
+Breakpoint 1, sort_files () at ls.c:2954
+2954	{
+(gdb) s
+2962	  if (! setjmp (failed_strcoll))
+(gdb) s
+2964	      switch (sort_type)
+(gdb) s
+2969		  switch (time_type)
+(gdb) s
+2975		      func = sort_reverse ? rev_cmp_mtime : compare_mtime;
+
+This compare_mtime function looks very interesting and may be the cause of our problems, so I set a breakpoint on this function. I received the following output, and stepped through to find where a discrepancy occurred. 
+
+Breakpoint 2, compare_mtime (a=0x617160, b=0x617210) at ls.c:2884
+2884	static int compare_mtime (V a, V b) { return cmp_mtime (a, b, xstrcoll); }
+(gdb) si
+timespec_cmp (b=..., a=...) at ../lib/timespec.h:49
+49	  return diff ? diff : a.tv_nsec - b.tv_nsec;
+(gdb) info locals
+diff = 9
+
+This diff variable seems to be some kind of difference in time of files, I assume. However, there is no error here as 9 seems to be a reasonable number. I stepped through some more, however, and the next instance of this function gave a much less reasonable number. Here is my output.
+
+(gdb) s
+timespec_cmp (b=..., a=...) at ../lib/timespec.h:48
+48	  int diff = a.tv_sec - b.tv_sec;
+(gdb) si
+49	  return diff ? diff : a.tv_nsec - b.tv_nsec;
+(gdb) info locals
+diff = -1162761593
+
+This number seems to be very odd, and is very indicative of our good old mathematical overflow. From here, I took a look inside the timespec.h file shown above and the timespec_cmp function. It is as follows. 
+
+timespec_cmp (struct timespec a, struct timespec b)
+{
+  int diff = a.tv_sec - b.tv_sec;
+  return diff ? diff : a.tv_nsec - b.tv_nsec;
+}
+
+It seems that overflow is the case, as subtraction is utilized here. It would make sense that a very old time would cause overflow when subtracting. From here I copied and pasted the constituents of this header file into my own called timespecpatch.h, and made my changes in emacs. The changes I made were simple; I only avoided subtraction and used comparison operators instead. I used a simple ternary operator saying if a > b, return 1, else if a < b return -1, else return 0. My changes are evident in the diff file given. I then added my GNU changelog simply using emacs and the format specified online. Finally, I had to alter the paths given by the diff file to make sure they worked in my coreutils-with0bug directory. This involved simply changing my paths to lib/timespec.h. I then copied my timespecpatch.h file to my home directory using the following command.
+
+cp timespecpatch.h ~/lab4.diff
+
+Then I tested my patch using the following command in the coreutils-with-bug directory.
+
+patch -p0 < ~/lab4.diff 
+
+It gave the following output, indicating the patch was successful.
+
+patching file lib/timespec.h
+
+I then used the "make" command to solidify the patch. After this, I switched back to the "$tmp" directory and retried the same command as before, shown below.
+
+TZ=UTC0 ~/coreutils-with-bug/src/ls ls -lt --full-time wwi-armistice now now1
+
+I recieved the following output, showing that the bug is now fixed. 
+
+-rw-r--r-- 1 rajiv csugrad 0 2018-02-11 20:08:23.592005396 +0000 now1
+-rw-r--r-- 1 rajiv csugrad 0 2018-02-11 20:08:14.608855470 +0000 now
+-rw-r--r-- 1 rajiv csugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice
+
+I then tried to test the SEASnet Linux servers for the same case. I used the following commands in my home directory on the Linux Server.
+
+touch -d '1918-11-11 11:00 GMT' wwi-armistice
+touch now
+sleep 1
+touch now1
+ls -lt --full-time wwi-armistice now now1
+
+It gave me the following bizarre output.
+
+-rw-r--r-- 1 rajiv csugrad 0 2054-12-17 09:28:16.000000000 -0800 wwi-armistice
+-rw-r--r-- 1 rajiv csugrad 0 2018-02-11 13:40:35.236714000 -0800 now1
+-rw-r--r-- 1 rajiv csugrad 0 2018-02-11 13:40:30.521701000 -0800 now
+
+It appears that the Linux Servers are also incapable of handling very ancient dates, as it acts as if the date is far in the future. The reason for this is evident, as the local linux system uses a 64-bit system, while the SEASNet servers use 32-bit. When the upper 32 bits are truncated, we lose the sign bit indicating that time is negative, so it treats it as a positive time. This is why the file seems to be in the future. 
+
+
+
+
+
+
