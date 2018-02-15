@@ -1,0 +1,16 @@
+2018-02-09  Rajiv Anisetti  <rajiv.anisetti@gmail.com>
+
+    * timespec.h (timespec_cmp): Avoided overflow by switching to comparison operators
+    
+--- lib/timespec.h	2005-09-21 23:05:39.000000000 -0700
++++ lib/timespec.h	2018-02-11 13:19:44.749495000 -0800
+@@ -45,8 +45,7 @@
+ static inline int
+ timespec_cmp (struct timespec a, struct timespec b)
+ {
+-  int diff = a.tv_sec - b.tv_sec;
+-  return diff ? diff : a.tv_nsec - b.tv_nsec;
++  return (a.tv_sec > b.tv_sec ? 1 : (a.tv_sec < b.tv_sec ? -1 : 0));
+ }
+ 
+ # if ! HAVE_DECL_NANOSLEEP
