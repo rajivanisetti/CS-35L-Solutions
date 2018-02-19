@@ -1,0 +1,151 @@
+The first thing I did was write my tr2b.c and tr2u.c files, I then compiled them using the following commands.
+
+gcc -o tr2b tr2b.c
+gcc -o tr2u tr2u.c
+
+After this, I noticed I still had the "words" file from our previous labs that was a little under 5 MB, so I decided to add a bunch of characters to the beginning to make it larger than 5 MB and test my programs on this. I first copied my words file to a difference file called "myBigFile", then used emacs to add a bunch of 'a's to the beginning of it. The new size of the file was larger than 5MB, I checked by using the ls -l command. I used the following command to check how many syscalls there were for the buffered version when copying from one file to another.
+
+strace -c ./tr2b 'a' 'z' < myBigFile  > outputBuf
+
+This was my output.
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 51.53    0.000624           1       621           write
+ 31.21    0.000378           1       623           read
+  4.62    0.000056           6         9           mmap
+  4.21    0.000051          26         2           open
+  2.89    0.000035           9         4           mprotect
+  1.65    0.000020           5         4           fstat
+  1.07    0.000013          13         1           munmap
+  0.91    0.000011           6         2           close
+  0.66    0.000008           8         1         1 access
+  0.66    0.000008           8         1           execve
+  0.33    0.000004           4         1           arch_prctl
+  0.25    0.000003           3         1           brk
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.001211                  1270         1 total
+
+I then tried doing the same, but for the unbuffered version of the code. I used the following command.
+
+strace -c ./tr2u 'a' 'z' < myBigFile > outputUbuf
+
+I received the follwoing output, which took quite a while.
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.53   22.502962           4   5080693           write
+ 44.47   18.019742           4   5080695           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         7           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   40.522704              10161410         1 total
+
+It is evident that the buffered version has much less system calls than the unbuffered version. I then tried just copying a file to the terminal, using the following command for the buffered version.
+
+strace -c ./tr2b 'a' 'z' < myBigFile
+
+I got the following output.
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 99.86    2.443311           5    481440           write
+  0.13    0.003207           5       623           read
+  0.00    0.000058           6         9           mmap
+  0.00    0.000041          10         4           mprotect
+  0.00    0.000019           5         4           fstat
+  0.00    0.000013           7         2           open
+  0.00    0.000010          10         1           munmap
+  0.00    0.000008           8         1           execve
+  0.00    0.000007           4         2           close
+  0.00    0.000007           7         1         1 access
+  0.00    0.000004           4         1           brk
+  0.00    0.000004           4         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    2.446689                482089         1 total
+
+For the unbuffered version, I used the following command:
+
+strace -c ./tr2u 'a' 'z' < myBigFile
+
+And I received the following output.
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 57.14   25.296345           5   5080693           write
+ 42.86   18.973553           4   5080695           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         7           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   44.269898              10161410         1 total
+
+In the case of printing to the terminal, the buffered version has many less system calls. Another observation is that the buffered version took a lot more system calls when printing to the terminal than when just copying to another file, while the unbuffered version took the same amount for both. 
+
+Next, I compared the time for both, using the following command for the buffered version.
+
+time ./tr2b 'a' 'z' < myBigFile  > outputBuf
+
+I received the following times.
+
+real	0m0.434s
+user	0m0.291s
+sys		0m0.081s
+
+I then used the following command to do the same for the unbuffered version.
+
+time ./tr2u 'a' 'z' < myBigFile  > outputUbuf
+
+i received the following times.
+
+real	0m9.406s
+user	0m1.402s
+sys		0m7.931s
+
+Clearly, the buffered version is much faster than the unbuffered version.
+
+I also tried for just outputting to the terminal. I used the following command for the buffered version.
+
+time ./tr2b 'a' 'z' < myBigFile
+
+I received the following output.
+
+real	0m1.038s
+user	0m0.352s
+sys		0m0.601s
+
+I then used the following command to do the same for the unbuffered version.
+
+time ./tr2u 'a' 'z' < myBigFile
+
+i received the following output.
+
+real	0m9.059s
+user	0m1.407s
+sys		0m7.636s
+
+Clearly, the buffered version is superior once again in terms of time.
+
+In conclusion, we know that buffered I/O is much faster and uses much less system calls than the unbuffered alternative. The use of getchar and putchar is a better choice in our scenario than read and write. 
+
+
+
+
+
+
+
