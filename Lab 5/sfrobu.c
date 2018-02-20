@@ -9,6 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+int flag = 0;
 
 int frobcmp(char const *a, char const *b)
 {
@@ -71,96 +75,158 @@ void checkStdin()
 }
 
 
-int main(void)
+int main(int argc, const char *argv[])
 {
-    char **words = (char**) malloc(sizeof(char*));  // WORDS ARRAY //
-    char *word = (char*) malloc(sizeof(char));      // CSTRING //
-    
-    if (words == NULL || word == NULL)
+    if (argc > 1)
     {
-        printError();
+        if (argv[1] == "-f")
+            flag = 1;
     }
     
-    int sizeOfWords = 0;
-    int sizeOfWord = 0;
+    struct stat file;
+    if (fstat(0, &file))
+    {
+        fprintf(stderr, "Could not read file!");
+        exit(1);
+    }
     
-    char previousCharacter = ' ';
-    char currentCharacter = getchar();
-    checkStdin();
+    char **sepWords;
+    char *unseparatedWords;
     
-    while (currentCharacter != EOF || !feof(stdin))
-      {   
-        if ((previousCharacter == ' ' || previousCharacter == '\n')  && (currentCharacter  == ' ' || currentCharacter == '\n'))   // IGNORE MULTIPLE SPACES
-        {
-            currentCharacter = getchar();
-            checkStdin();
-            previousCharacter = ' ';
-            continue;
-        }
-        else
-        {
-            sizeOfWord++;
-            word = (char*) realloc(word, sizeOfWord * sizeof(char));
-            if (word == NULL)
-            {
-                printError();
-            }
-        }
+    char curr = ' ';
+    char prev = ' ';
+    
+    if (S_ISREG(file.st_mode))
+    {
+        long size = file.st_size;
+        long i = 0;
+        long numWords = 0;
         
-        if (currentCharacter == ' ' || currentCharacter == '\n') // THEN PLACE WORD IN ARRAY OF WORDS //
+        unseparatedWords = (char*)malloc(size);
+        if (unseparatedWords == NULL)
         {
-	    word[sizeOfWord - 1] = ' ';
-            sizeOfWords++;
-            words = (char**) realloc(words, sizeOfWords * sizeof(char*));
-            if (words == NULL)
+            fprintf(stderr, "Cannot allocate memory!");
+            exit(1);
+        }
+        while (read(0, &curr, 1) > 0)
+        {
+            if (curr == ' ' && prev == ' ')  // skip duplicate spaces
             {
-                printError();
-            }
-            else
-            {
-                words[sizeOfWords - 1] = word;
+                continue;
             }
             
-            sizeOfWord = 0;
-            word = (char*) malloc(sizeof(char));
-        }
-        else    // APPEND TO WORD //
-        {
-	  //  printf("adding %c to word", currentCharacter);
-            word[sizeOfWord - 1] = currentCharacter;
+            unseparatedWords[i] = curr;
+            i++;
+            
+            if (curr == ' ')
+                numWords++;
+            
+            prev = curr;
+            
         }
         
-        previousCharacter = currentCharacter;
-          currentCharacter = getchar();
-          checkStdin();
+        if (prev != ' ')
+        {
+            unseparatedWords[i] = ' ';
+            i++;
+            numWords++;
+        }
+        
+        int lengthOfWords = i;
+        sepWords = (char**)malloc(numWords * sizeof(char*));
+        if (sepWords == NULL)
+        {
+            fprintf(stderr, "Cannot allocate memory!");
+            exit(1);
+        }
+        
+        // ADD WORDS TO WORDS ARRAY //
+        
+        int w, k;
+        int count = 0;
+        for (k = 0; k < numWords; k++)
+        {
+            for (w = 0; unseparatedWords[count + w] != ' ' && (count + w) < lengthOfWords; w++)
+            {
+                sepWords[k][w] = unseparatedWords[count + w];
+            }
+            sepWords[k][w] = ' ';
+            count = w + 1;
+        }
     }
-    
-    if (previousCharacter != ' ' && previousCharacter != '\n') // LAST WORD NOT GUARANTEED TO HAVE SPACE //
+    else if (!S_ISREG(file.st_mode))    // IRREGULAR FILE //
     {
-        sizeOfWord++;   // ADD SPACE TO END //
-        word = (char*) realloc(word, sizeOfWord * sizeof(char));
-        if (word == NULL)
+        int allocationSize = 0;   // allocate 0 bytes to start //
+        unseparatedWords = (char) malloc(allocationSize);
+        
+        long i = 0;
+        char curr = ' ';
+        char prev = ' ';
+        while (read(0, &curr, 1) > 0)
         {
-            printError();
-        }
-        else
-        {
-            word[sizeOfWord - 1] = ' ';
+            allocationSize++;
+            unseparatedWords = (char)realloc(allocationSize);
+            if (unseparatedWords == NULL)
+            {
+                fprintf(stderr, "Cannot allocate memory!");
+                exit(1);
+            }
+            
+            if (curr == ' ' && prev == ' ')  // skip duplicate spaces
+            {
+                continue;
+            }
+            
+            unseparatedWords[i] = curr;
+            i++;
+            
+            if (curr == ' ')
+                numWords++;
+            
+            prev = curr;
         }
         
-        sizeOfWords++;  // ADD WORD TO ARRAY OF WORDS //
-        words = (char**) realloc(words, sizeOfWords * sizeof(char*));
-        if (words == NULL)
+        if (prev != ' ')
         {
-            printError();
+            allocationSize++;
+            unseparatedWords = (char)realloc(allocationSize);
+            if (unseparatedWords == NULL)
+            {
+                fprintf(stderr, "Cannot allocate memory!");
+                exit(1);
+            }
+            
+            unseparatedWords[i] = ' ';
+            i++;
+            numWords++;
         }
-        else
+        
+        int lengthOfWords = i;
+        sepWords = (char**)malloc(numWords * sizeof(char*));
+        if (sepWords == NULL)
         {
-            words[sizeOfWords - 1] = word;
+            fprintf(stderr, "Cannot allocate memory!");
+            exit(1);
         }
+        
+        // ADD WORDS TO WORDS ARRAY //
+        
+        int w, k;
+        int count = 0;
+        for (k = 0; k < numWords; k++)
+        {
+            for (w = 0; unseparatedWords[count + w] != ' ' && (count + w) < lengthOfWords; w++)
+            {
+                sepWords[k][w] = unseparatedWords[count + w];
+            }
+            sepWords[k][w] = ' ';
+            count = w + 1;
+        }
+        
     }
+
     
-    qsort(words, sizeOfWords, sizeof(char*), compare);  // SORT //
+    qsort(sepWords, numWords, sizeof(char*), compare);  // SORT //
     
     int count1 = 0;
     int count2 = 0;
@@ -168,15 +234,23 @@ int main(void)
     {
         while (words[count1][count2] != ' ')
         {
-            putchar(words[count1][count2]);
+            if (write(0, &words[count1][count2], 1) < 0)
+            {
+                fprintf(stderr, "Error writing!");
+                exit(1);
+            }
             count2++;
         }
-        putchar(' ');
+        if (write(0, ' ', 1) < 0)
+        {
+            fprintf(stderr, "Error writing!");
+            exit(1);
+        }
         count1++;
         count2 = 0;
     }
 
-    free(word);
-    free(words);
+    free(unseparatedWords);
+    free(sepWords);
     
 }
