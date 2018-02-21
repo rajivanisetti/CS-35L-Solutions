@@ -59,7 +59,7 @@ done
 
 if [ "$foption" = "true" ]
 then
-    cat | tr "$aftertrace" "$pretrace" | sort -f | tr "$pretrace" "$aftertrace"
+    cat | tr "$aftertrace" "$pretrace" | sort -f | tr "$pretrace" "$aftertrace" | sed -e 's/^[ \t]*//'
 else
-    cat | tr "$aftertrace" "$pretrace" | sort | tr "$pretrace" "$aftertrace"
+    cat | tr "$aftertrace" "$pretrace" | sort | tr "$pretrace" "$aftertrace" | sed -e 's/^[ \t]*//'
 fi
