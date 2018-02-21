@@ -1,0 +1,108 @@
+After rewriting sfrob to only use system calls, I checked the performance of both using the time command. I still had my very large file (5MB) from the lab portion of this assignment, so I chose that to measure the time difference. I used the following commands.
+
+time ./sfrob < myBigFile > results.txt
+
+And I got the following time output. 
+
+real	0m0.682s
+user	0m0.570s
+sys		0m0.037s
+
+I then ran the same command for sfrobu.
+
+time ./sfrobu < myBigFile > results.txt
+
+I got the following output.
+
+real	0m10.465s
+user	0m1.468s
+sys		0m8.922s
+
+Clearly, sfrobu takes a much longer time to complete the task, because of it's use of unbuffered I/O. sfrob completes the task many times faster than sfrobu. I checked with another file just to be thorough, the timing outputs were as follows:
+
+For sfrob:
+
+real	0m0.007s
+user	0m0.002s
+sys		0m0.002s
+
+For sfrobu:
+
+real	0m0.023s
+user	0m0.004s
+sys		0m0.015s
+
+It is clear that sfrob is much faster.
+
+To count the number of comparisons that sfrobu was making, I added a global variable and incremented it whenever I used frobcmp. I made a file that just repeated the words "Rajiv is a CS GOD!" in different increments to test the number of comparisons for each. I knew that the number should be close to that of quicksort, which operates on a complexity of nlog(n). I just needed to verify this.
+
+For 10 lines: 23 comparisons
+For 25 lines: 90 comparisons
+For 50 lines: 225 Comparisons
+For 100 lines: 540 Comparisons
+For 1000 lines: 9562 Comparisons
+For 10000 lines: 129552 Comparisons
+
+It is evident that it is making close to an nlog(n) comparisons where n is the number of lines. This is intuitive, as we use qsort in our program, which has a complexity close to quicksort.
+
+I then made my bash script sfrobs and tested it in comparison to the other two, with the same files from before. For myBigFile, the time output was as follows:
+
+real	0m0.176s
+user	0m0.021s
+sys		0m0.064s
+
+It seems that the sfrobs shell script is better than both C programs and runs faster. I tested with another file to verify this. 
+
+Time for sfrob:
+
+real	0m0.646s
+user	0m0.540s
+sys		0m0.023s
+
+Time for sfrobu:
+
+real	0m11.123s
+user	0m1.655s
+sys		0m9.398s
+
+Time for sfrobs:
+
+real	0m0.098s
+user	0m0.011s
+sys		0m0.030s
+
+Once again, sfrobs beats the others in terms of time. It seems that sfrobs is the fastest out of all 3, while sfrob comes in at a close second and sfrobu is much slower. 
+
+I did one final test between sfrob, sfrobu, sfrobu -f, sfrobs, and sfrobs -f to check the timing differences while taking into account the f option. I used my file, myBigFile, once again as it is a large file and will probably give the most accurate results. Here is a final comparison of all programs with their options.
+
+Time for sfrob:
+
+real	0m0.682s
+user	0m0.581s
+sys		0m0.026s
+
+Time for sfrobu:
+
+real	0m9.675s
+user	0m1.485s
+sys		0m8.116s
+
+Time for sfrobu -f:
+
+real	0m9.842s
+user	0m1.429s
+sys		0m8.343s
+
+Time for sfrobs:
+
+real	0m0.100s
+user	0m0.010s
+sys		0m0.031s
+
+Time for sfrobs -f:
+
+real	0m0.133s
+user	0m0.025s
+sys		0m0.060s
+
+In conclusion, sfrobs is the fastest, sfrobs -f is second, sfrob is third, sfrobu is fourth, and sfrobu -f is last. There seems to be a large jump between sfrob and sfrobu, which testifies how much faster buffered I/O is than unbuffered. 

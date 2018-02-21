@@ -11,16 +11,37 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
+#include <limits.h>
+#include <ctype.h>
 
 int flag = 0;
+long numComparisons = 0;
 
 int frobcmp(char const *a, char const *b)
 {
     int count = 0;
     while (a[count] != ' ' && b[count] != ' ')
     {
-        char afrob = (a[count] ^ 42);
-        char bfrob = (b[count] ^ 42);
+      char afrob;
+      char bfrob;
+      if (flag)
+	{
+	  char aunfrob = (unsigned char)( a[count] ^ 42);
+	  char bunfrob = (unsigned char)(b[count] ^ 42);
+	  if (((aunfrob < 0 || aunfrob > UCHAR_MAX) && aunfrob != EOF) || ((aunfrob < 0 || aunfrob > UCHAR_MAX) && aunfrob != EOF))
+	    {
+	      fprintf(stderr, "Cannot unfrobnicate character!");
+	      exit(1);
+	    }
+	  afrob = toupper(a[count] ^ 42);
+	  bfrob = toupper(b[count] ^ 42);
+	}
+      else
+	{
+	  afrob = (a[count] ^ 42);
+          bfrob = (b[count] ^ 42);
+	}
         if (afrob < bfrob)
         {
             return -1;
@@ -56,6 +77,7 @@ int compare(const void *x, const void* y)       // FOR QSORT //
 {
     const char* a = *(const char**) x;
     const char* b = *(const char**) y;
+    numComparisons = numComparisons + 1;
     return frobcmp(a, b);
 }
 
@@ -74,183 +96,152 @@ void checkStdin()
     }
 }
 
-
-int main(int argc, const char *argv[])
+void sfrob(long sizeOfFile)
 {
-    if (argc > 1)
-    {
-        if (argv[1] == "-f")
-            flag = 1;
-    }
+    char *unseparatedWords = (char*)malloc(sizeOfFile * sizeof(char));
+    char **sepWords = (char**)malloc(sizeof(char*));
     
-    struct stat file;
-    if (fstat(0, &file))
+    if (unseparatedWords == NULL || sepWords == NULL)
     {
-        fprintf(stderr, "Could not read file!");
+        fprintf(stderr, "Memory allocation failed!");
         exit(1);
     }
     
-    char **sepWords;
-    char *unseparatedWords;
+    long sizeOfUnsep = 0;
+    long sizeOfSep = 0;
+    long maxSize = sizeOfFile;
     
     char curr = ' ';
     char prev = ' ';
     
-    if (S_ISREG(file.st_mode))
+    while (read(0, &curr, 1) > 0)
     {
-        long size = file.st_size;
-        long i = 0;
-        long numWords = 0;
-        
-        unseparatedWords = (char*)malloc(size);
-        if (unseparatedWords == NULL)
+        if (curr == ' ' && prev == ' ')
         {
-            fprintf(stderr, "Cannot allocate memory!");
-            exit(1);
+            continue;
         }
-        while (read(0, &curr, 1) > 0)
+        else
         {
-            if (curr == ' ' && prev == ' ')  // skip duplicate spaces
+            sizeOfUnsep++;
+            if (sizeOfUnsep >= maxSize)
             {
-                continue;
+                maxSize++;
+                unseparatedWords = (char*)realloc(unseparatedWords, maxSize * sizeof(char));
+                if (unseparatedWords == NULL)
+                {
+                    fprintf(stderr, "Memory allocation failed!");
+                    exit(1);
+                }
             }
-            
-            unseparatedWords[i] = curr;
-            i++;
-            
-            if (curr == ' ')
-                numWords++;
-            
-            prev = curr;
-            
+            unseparatedWords[sizeOfUnsep - 1] = curr;
         }
         
-        if (prev != ' ')
-        {
-            unseparatedWords[i] = ' ';
-            i++;
-            numWords++;
-        }
-        
-        int lengthOfWords = i;
-        sepWords = (char**)malloc(numWords * sizeof(char*));
-        if (sepWords == NULL)
-        {
-            fprintf(stderr, "Cannot allocate memory!");
-            exit(1);
-        }
-        
-        // ADD WORDS TO WORDS ARRAY //
-        
-        int w, k;
-        int count = 0;
-        for (k = 0; k < numWords; k++)
-        {
-            for (w = 0; unseparatedWords[count + w] != ' ' && (count + w) < lengthOfWords; w++)
-            {
-                sepWords[k][w] = unseparatedWords[count + w];
-            }
-            sepWords[k][w] = ' ';
-            count = w + 1;
-        }
+        prev = curr;
     }
-    else if (!S_ISREG(file.st_mode))    // IRREGULAR FILE //
-    {
-        int allocationSize = 0;   // allocate 0 bytes to start //
-        unseparatedWords = (char) malloc(allocationSize);
-        
-        long i = 0;
-        char curr = ' ';
-        char prev = ' ';
-        while (read(0, &curr, 1) > 0)
-        {
-            allocationSize++;
-            unseparatedWords = (char)realloc(allocationSize);
-            if (unseparatedWords == NULL)
-            {
-                fprintf(stderr, "Cannot allocate memory!");
-                exit(1);
-            }
-            
-            if (curr == ' ' && prev == ' ')  // skip duplicate spaces
-            {
-                continue;
-            }
-            
-            unseparatedWords[i] = curr;
-            i++;
-            
-            if (curr == ' ')
-                numWords++;
-            
-            prev = curr;
-        }
-        
+    
         if (prev != ' ')
+    {
+        sizeOfUnsep++;
+        if (sizeOfUnsep >= maxSize)
         {
-            allocationSize++;
-            unseparatedWords = (char)realloc(allocationSize);
+            maxSize++;
+            unseparatedWords = (char*)realloc(unseparatedWords, maxSize * sizeof(char));
             if (unseparatedWords == NULL)
             {
-                fprintf(stderr, "Cannot allocate memory!");
+                fprintf(stderr, "Memory allocation failed!");
                 exit(1);
             }
-            
-            unseparatedWords[i] = ' ';
-            i++;
-            numWords++;
         }
-        
-        int lengthOfWords = i;
-        sepWords = (char**)malloc(numWords * sizeof(char*));
-        if (sepWords == NULL)
+        unseparatedWords[sizeOfUnsep - 1] = ' ';
+	} 
+
+    long i;
+    for (i = 0; i < sizeOfUnsep; i++)
+    {
+        if (unseparatedWords[i] == ' ')
+            sizeOfSep++;
+    }
+    
+
+    int k;
+    int start = 0;
+    int sepcount = 0;
+    for (k = 0; k < sizeOfUnsep; k++)
+    {
+        if (unseparatedWords[k] == ' ')
         {
-            fprintf(stderr, "Cannot allocate memory!");
-            exit(1);
-        }
-        
-        // ADD WORDS TO WORDS ARRAY //
-        
-        int w, k;
-        int count = 0;
-        for (k = 0; k < numWords; k++)
-        {
-            for (w = 0; unseparatedWords[count + w] != ' ' && (count + w) < lengthOfWords; w++)
+            sepWords = (char**) realloc(sepWords, (sepcount + 1)  * sizeof(char*));
+            if (sepWords == NULL)
             {
-                sepWords[k][w] = unseparatedWords[count + w];
+                printf("Could not allocate memory!");
+                exit(1);
             }
-            sepWords[k][w] = ' ';
-            count = w + 1;
+            sepWords[sepcount] = unseparatedWords + start;
+            sepcount++;
+            start = k + 1;
         }
-        
     }
 
-    
-    qsort(sepWords, numWords, sizeof(char*), compare);  // SORT //
+   
+    qsort(sepWords, sizeOfSep, sizeof(char*), compare);  // SORT //
     
     int count1 = 0;
     int count2 = 0;
-    while (count1 < sizeOfWords)    // PRINT WORDS IN SORTED ORDER
+    char space = ' ';
+    while (count1 < sizeOfSep)    // PRINT WORDS IN SORTED ORDER
     {
-        while (words[count1][count2] != ' ')
+        while (sepWords[count1][count2] != ' ')
         {
-            if (write(0, &words[count1][count2], 1) < 0)
+            if (write(1, &sepWords[count1][count2], 1) < 0)
             {
                 fprintf(stderr, "Error writing!");
                 exit(1);
             }
             count2++;
         }
-        if (write(0, ' ', 1) < 0)
+        if (write(1, &space, 1) < 0)
         {
             fprintf(stderr, "Error writing!");
             exit(1);
         }
         count1++;
         count2 = 0;
-    }
-
+    } 
+    
     free(unseparatedWords);
     free(sepWords);
+   
+}
+
+
+int main(int argc, const char *argv[])
+{
+     if (argc > 1)
+    {
+        if (!strncmp(argv[1], "-f", 2))
+	  {
+            flag = 1;
+	  }
+    } 
+
+    struct stat file;
     
+    if (fstat(0, &file) < 0)
+    {
+        fprintf(stderr, "Could not read file!");
+        exit(1);
+    }
+    
+    if (S_ISREG(file.st_mode))
+    {
+        long size = file.st_size;
+        sfrob(size);
+    }
+    else
+    {
+        sfrob(sizeof(char));
+    }
+
+    // printf("Number of Comparisons: %u\n", numComparisons);
+
 }
