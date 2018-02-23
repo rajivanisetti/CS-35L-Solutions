@@ -1,0 +1,70 @@
+I first started off the lab by making sure my sort command was up to date. 
+I used the following command to check this.
+
+/usr/local/cs/bin/sort --version
+
+I found that my version number was 8.29 and I was up to date.
+
+I then proceeded to create a file with 10,000,000 single precision floating point numbers. 
+I used the following command to do this.
+
+od -An -tf4 -N 40000000 < /dev/urandom | sed -e 's/^[ \t]*//' | tr -s ' ' '\n'  > floats.txt
+
+Here are descriptions of why I used each option.
+
+-An: This made sure that no address lines were printed out, which would unecessary non-floating points to the file.
+
+-tf4: This option made sure that the bytes were interpreted as 4 byte (single precision) floating point numbers.
+
+-N 40000000: This made sure that we obtained 40,000,000 bytes (10 million floating points)
+
+sed -e 's/^[ \t]*//': Remove leading spaces
+
+tr -s ' ' '\n': Change all spaces to newlines
+
+I checked that the file was 10,000,000 lines, indicating 10,000,000 floating points using the wc -l command.
+This output 10,000,000.
+
+From here on out, I tested the sort command's time with the default threads along with 1, 2, 4, and 8 threads.
+
+Using the command "time -p /usr/local/cs/bin/sort -g floats.txt > /dev/null" tested the default sort function. I got the following times.
+
+real 21.96
+user 117.38
+sys 0.63
+
+I then tried with one thread, using the command "time -p /usr/local/cs/bin/sort -g --parallel=1 floats.txt > /dev/null" and received the following times.
+
+real 116.47
+user 115.61
+sys 0.86
+
+I then tried with 2, 4, and 8 threads by replacing the "1" with each and received the followins times for each.
+
+For 2:
+
+real 61.22
+user 114.94
+sys 1.25
+
+For 4:
+
+real 34.26
+user 115.18
+sys 0.55
+
+For 8:
+
+real 22.00
+user 116.72
+sys 0.76
+
+In conclusion, we notice that the default sort options and multithreading with 8 threads yield about the same real time,
+while all of the other options are slower in correlation with the less threads they use. The user times are about the 
+same for each one. The system times seemed to have no correlation or pattern when compared to eachother. We can conclude 
+that the default GNU sort utilizes multithreading and it has very significant effects when it comes to real time. 
+
+
+
+
+
