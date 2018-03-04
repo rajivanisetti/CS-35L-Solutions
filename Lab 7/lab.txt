@@ -1,0 +1,100 @@
+I started off by setting up my Beaglebone using the Piazza post. I clicked on the START.htm file
+and downloaded and installed the files the site instructed me to. I then restarted my computer.
+
+After this, I tried to ssh into my Beaglebone using the command "sudo ssh root@192.168.7.2",
+as the Piazza setup instructions said to. I entered my password for my laptop, and then set
+my password using the passwd command. After this, I turned on the hotspot on my phone and 
+tried to connect my Beaglebone. I first used the command "sudo connmanctl", and then entered
+my password. After this, I used the following commands.
+
+enable wifi
+
+scan wifi
+
+services
+
+From here, I found that my hotspot had the following ID.
+
+wifi_2cf7f10653b2_6950686f6e65_managed_psk
+
+So I used the following commands to connect. 
+
+agent on
+
+connect wifi_2cf7f10653b2_6950686f6e65_managed_psk
+
+From here, I entered my password to connect and
+ exited the connmanctl shell using the "quit" command.
+
+I then made sure to download/update xauth and xterm using apt-get install xauth and 
+apt-get install xterm. These downloaded.
+
+I then set up a hostname named using the following command.
+
+hostname raj
+
+I then used the "hostname" command and it said "raj", so I know my hostname was set up.
+
+From here, I tried to ssh into my partner's board with user root.
+
+His IP was 172.20.10.4, so I used the following command to ssh into his board.
+
+ssh root@172.20.10.4
+
+I had to ask for his password in order to get in, which worked and I was connected to his board.
+
+After this, my partner did the same for my board. Then, I logged out and set up a user account for
+my partner.
+
+I used the following command.
+
+useradd ray
+passwd ray
+
+I made his password "RAY". After this I used the following commands to make a home directory for him
+
+mkdir /home/ray
+chown ray /home/ray
+
+Raymond did the same for me, and he succesfully ssh'ed into his account on my board, but using the
+password. I did the same, ssh'ing into my account, which was raj@172.20.10.4 w/ password "RAJ".
+
+From here, I began the process of ssh'ing into my partner's board without a password.
+
+I first, from my Beaglebone, used the "ssh-keygen" command.
+I decided to keep it in /root/.ssh/id_rsa, so I just pressed enter.
+I decided to use no passphrase, as I'm not concerned with the security here. It output the following key.
+
++---[RSA 2048]----+
+|   o.  ...       |
+|  ..o ..o.       |
+|  .. *++..       |
+| .  *o+.+        |
+|. .+ o .S.       |
+| o. . . .        |
+|  ..E            |
+|   .             |
+|                 |
++-----------------+
+
+I then used the following command: ssh-copy-id raj@172.20.10.4
+
+This copied my public key to the remote server. I then used the following commands to finish off.
+
+eval 'ssh-agent'
+ssh-add
+
+From here, I tried to ssh onto Raymond's Beaglebone normally, using "ssh raj@172.20.10.4", and it connected
+without the use of any password.
+
+After this, I exited from my BBG, and tried ssh'ing using the -X option. However, I encountered some errors, 
+and found on Piazza that the fix was for me to download/install XQuartz. I did this and restarted my computer.
+
+After, I used this command to ssh into my BeagleBone.
+
+ssh -X root@192.68.7.2
+
+This time it worked succesfully with no errors or warnings. From here, I used the "ssh -X raj@172.20.10.4"
+command to ssh -X into Raymond's Beaglebone. It worked succesfully without asking for my password. From 
+here, I simply used the "xterm" command, and a shell window came up (which did not come up without XQuartz).
+The lab is complete.
