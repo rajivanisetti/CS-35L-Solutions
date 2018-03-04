@@ -1,0 +1,28 @@
+1)
+
+If the other teams were really observing all bytes going across the network, we would still be secure. 
+First, there is the user authentication phase. All data going across the server will be encrypted by the 
+public key of the data recipient, and can be intercepted, but cannot be decrypted, as only the recipient's 
+private key can do so. The snoopers would not be able to decrypt this portion of the process, and would
+not be able to generate a session key. 
+
+However, if the snoopers were to tap our keyboard, we would no longer be safe in some circumstances. 
+This is because they might gain access to the passphrases that we used, and in turn, the private key. 
+From this, they would be able to generate a session and decrypt all data being sent over the network. 
+Thus, if our keyboard was tapped before we started passphraseless ssh'ing, we would not be safe. 
+However, if they tapped our keyboard after we set up the ssh to work without a passphrase, they 
+would not be able to gain our private key, and we would be safe.
+
+If the snoopers had access to the USB used to boot our system up, we would be insecure. They
+would have access to our .ssh files and would be able to extract the private key from 
+our storage. This would allow the snoopers to decipher all of the data being sent. 
+
+2)
+
+The command "gpg --verify" does not work well in this situation. The command only verifies if
+the public key and signature correspond. However, someone who may intercept data could simply
+alter the contents of the data and sign the data with his/her own public key, and the verify
+command would see no problem. Thus, this command is not trustworthy for general use, as
+interception is its main downfall. A fix to this would be to use an online website that allows
+you to check whose digital signature is on the data such as Digicert. In this scenario, 
+you would only trust data that has the signature of the person you know should be sending.

@@ -1,8 +1,8 @@
 I started off by setting up my Beaglebone using the Piazza post. I clicked on the START.htm file
 and downloaded and installed the files the site instructed me to. I then restarted my computer.
 
-After this, I tried to ssh into my Beaglebone using the command "sudo ssh root@192.168.7.2",
-as the Piazza setup instructions said to. I entered my password for my laptop, and then set
+After this, I tried to ssh into my Beaglebone using the command "sudo ssh root@192.168.7.2". 
+I entered my password for my laptop, and then set
 my password using the passwd command. After this, I turned on the hotspot on my phone and 
 tried to connect my Beaglebone. I first used the command "sudo connmanctl", and then entered
 my password. After this, I used the following commands.
@@ -24,10 +24,10 @@ agent on
 connect wifi_2cf7f10653b2_6950686f6e65_managed_psk
 
 From here, I entered my password to connect and
- exited the connmanctl shell using the "quit" command.
+exited the connmanctl shell using the "quit" command.
 
 I then made sure to download/update xauth and xterm using apt-get install xauth and 
-apt-get install xterm. These downloaded.
+apt-get install xterm. These downloaded/installed.
 
 I then set up a hostname named using the following command.
 
@@ -44,7 +44,7 @@ ssh root@172.20.10.4
 I had to ask for his password in order to get in, which worked and I was connected to his board.
 
 After this, my partner did the same for my board. Then, I logged out and set up a user account for
-my partner.
+my partner, Raymond.
 
 I used the following command.
 
@@ -87,8 +87,9 @@ ssh-add
 From here, I tried to ssh onto Raymond's Beaglebone normally, using "ssh raj@172.20.10.4", and it connected
 without the use of any password.
 
-After this, I exited from my BBG, and tried ssh'ing using the -X option. However, I encountered some errors, 
-and found on Piazza that the fix was for me to download/install XQuartz. I did this and restarted my computer.
+After this, I exited from my BBG, and tried ssh'ing using the -X option. However, I encountered some errors near
+the end of the process with xterm, and found on Piazza that the fix was for me to download/install XQuartz. 
+I did this and restarted my computer.
 
 After, I used this command to ssh into my BeagleBone.
 
