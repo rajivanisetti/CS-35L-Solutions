@@ -82,8 +82,10 @@ mmap(0x7f18f4768000, 16832, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANON
 close(3)    
 
 These sequences of commands are opening the libraries that are being used in the program. The "open" command
-opens the libraries in order to utilize its constituent code, "read" obviously reads the code, and finally
-the "close" command closes the library. We see that the libc.so.6 and ld.so.cache libararies were opened
+opens the libraries in order to utilize its constituent code, "read" obviously reads the code. After this, we can
+see that the "mmap" and "mprotect" commands are used. These are dynamically allocating memory for 
+the libraries and pretecting these memories. After this, the "fstat" command is used to obtain file statuses.
+And finally the "close" command closes the library. We see that the libc.so.6 and ld.so.cache libararies were opened. 
 It is also noteworthy that libc.so.6 is a dynamic library, as it was output by the ldd command from earlier.
 
 4)
