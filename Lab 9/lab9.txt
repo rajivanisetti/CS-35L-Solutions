@@ -1,0 +1,328 @@
+1)
+
+First, I navigated to the Savannah repository linked by the assignment page.
+After this, I cloned the repository using the following command.
+
+git clone https://git.savannah.gnu.org/git/diffutils.git
+
+2)
+
+After this, I switched to the diffutils directory and got a log of changes and put 
+it into git-log.txt using the following command.
+
+git log > git-log.txt
+
+3)
+
+I then got a list of tags an put it into git-tags.txt using the following command.
+
+git tag > git-tags.txt
+
+4)
+
+I then decided to view the git-log.txt file in emacs and used C-s to search for 
+"maint: quote 'like this' or "like this", not `like this'" I found the commit ID
+to be 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f.
+
+After this, I used the format-patch command to create the patch, using the following command.
+
+git format-patch -1 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f --stdout > quote-patch.txt
+
+I used the --stdout flag, as I didn't want the names of output files output to standard output.
+
+5)
+
+I then used the checkout command to get version 3.0, using the following command.
+
+git checkout v3.0
+
+6)
+
+After this, I applied the patch using the following command.
+
+patch -p1 < quote-patch.txt
+
+I had to hit RETURN a couple times when it could not find a file to patch, but I eventually got this output.
+
+9 out of 9 hunks ignored
+patching file ms/config.bat
+patching file ms/config.site
+Hunk #1 succeeded at 73 with fuzz 1.
+patching file po/en.po
+patching file src/analyze.c
+patching file src/cmp.c
+Hunk #1 succeeded at 36 with fuzz 1.
+Hunk #4 succeeded at 185 (offset -6 lines).
+Hunk #5 succeeded at 231 (offset -6 lines).
+Hunk #6 succeeded at 257 (offset -6 lines).
+Hunk #7 succeeded at 269 (offset -6 lines).
+Hunk #8 succeeded at 364 (offset -6 lines).
+Hunk #9 succeeded at 377 (offset -6 lines).
+patching file src/context.c
+Hunk #1 succeeded at 159 (offset 1 line).
+Hunk #2 succeeded at 289 (offset 1 line).
+Hunk #3 succeeded at 393 with fuzz 2 (offset 1 line).
+Hunk #4 succeeded at 431 (offset 1 line).
+Hunk #5 succeeded at 459 (offset 1 line).
+patching file src/diff.c
+Hunk #1 succeeded at 40 with fuzz 2 (offset -2 lines).
+Hunk #2 succeeded at 57 (offset -2 lines).
+Hunk #3 succeeded at 92 (offset -2 lines).
+Hunk #4 succeeded at 330 (offset -10 lines).
+Hunk #5 succeeded at 505 (offset -10 lines).
+Hunk #6 succeeded at 534 (offset -10 lines).
+Hunk #7 succeeded at 585 (offset -14 lines).
+Hunk #8 succeeded at 744 (offset -14 lines).
+Hunk #9 succeeded at 826 (offset -14 lines).
+Hunk #10 FAILED at 876.
+Hunk #11 FAILED at 906.
+Hunk #12 FAILED at 942.
+Hunk #13 succeeded at 960 with fuzz 2 (offset -29 lines).
+Hunk #14 succeeded at 1159 with fuzz 2 (offset -32 lines).
+3 out of 14 hunks FAILED -- saving rejects to file src/diff.c.rej
+patching file src/diff.h
+Hunk #2 succeeded at 126 with fuzz 2 (offset -13 lines).
+Hunk #3 succeeded at 202 (offset -13 lines).
+patching file src/diff3.c
+Hunk #1 succeeded at 35 (offset 1 line).
+Hunk #2 succeeded at 159 (offset 1 line).
+Hunk #3 succeeded at 316 (offset 1 line).
+Hunk #4 succeeded at 351 (offset 1 line).
+Hunk #5 succeeded at 412 (offset 1 line).
+Hunk #6 FAILED at 433.
+Hunk #7 succeeded at 460 with fuzz 2 (offset -18 lines).
+Hunk #8 succeeded at 1275 (offset -18 lines).
+Hunk #9 succeeded at 1475 (offset -18 lines).
+1 out of 9 hunks FAILED -- saving rejects to file src/diff3.c.rej
+patching file src/dir.c
+Hunk #1 succeeded at 84 (offset -1 lines).
+Hunk #2 succeeded at 125 (offset -1 lines).
+Hunk #3 succeeded at 154 (offset -1 lines).
+Hunk #4 succeeded at 234 (offset -1 lines).
+patching file src/ifdef.c
+patching file src/io.c
+patching file src/sdiff.c
+Hunk #2 succeeded at 92 (offset 1 line).
+Hunk #3 succeeded at 175 (offset 23 lines).
+Hunk #4 succeeded at 230 (offset 17 lines).
+Hunk #5 succeeded at 286 (offset 17 lines).
+Hunk #6 succeeded at 572 (offset 13 lines).
+Hunk #7 succeeded at 747 (offset 41 lines).
+patching file src/side.c
+patching file src/system.h
+Hunk #2 succeeded at 105 (offset 6 lines).
+patching file src/util.c
+Hunk #4 succeeded at 190 with fuzz 2.
+Hunk #8 succeeded at 650 (offset -27 lines).
+patching file tests/help-version
+Hunk #1 succeeded at 75 (offset 1 line).
+Hunk #2 succeeded at 85 (offset 1 line).
+Hunk #3 succeeded at 96 (offset 1 line).
+Hunk #4 succeeded at 108 (offset 1 line).
+Hunk #5 succeeded at 140 (offset 1 line).
+Hunk #6 succeeded at 188 (offset 1 line).
+
+7)
+
+I then used the git status command to check the changes, I receieved this output.
+
+HEAD detached at v3.0
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   NEWS
+	modified:   README
+	modified:   TODO
+	modified:   doc/diagmeet.note
+	modified:   ms/config.bat
+	modified:   ms/config.site
+	modified:   po/en.po
+	modified:   src/analyze.c
+	modified:   src/cmp.c
+	modified:   src/context.c
+	modified:   src/diff.c
+	modified:   src/diff.h
+	modified:   src/diff3.c
+	modified:   src/dir.c
+	modified:   src/ifdef.c
+	modified:   src/io.c
+	modified:   src/sdiff.c
+	modified:   src/side.c
+	modified:   src/system.h
+	modified:   src/util.c
+	modified:   tests/help-version
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	0001-maint-quote-like-this-or-like-this-not-like-this.patch
+	NEWS.orig
+	README-hacking.orig
+	README-hacking.rej
+	README.orig
+	README.rej
+	cfg.mk.orig
+	cfg.mk.rej
+	git-log.txt
+	git-tags.txt
+	ms/config.site.orig
+	quote-patch.txt
+	src/cmp.c.orig
+	src/context.c.orig
+	src/diff.c.orig
+	src/diff.c.rej
+	src/diff.h.orig
+	src/diff3.c.orig
+	src/diff3.c.rej
+	src/dir.c.orig
+	src/sdiff.c.orig
+	src/system.h.orig
+	src/util.c.orig
+	tests/help-version.orig
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+It is clear the the files were modified and the patch was appended.
+
+8/9) 
+
+I then entered all of the files that weren't C files using emacs, and utilized the vc-revert command (C-x v u)
+to revert the changes, typing "yes" each time to discard the changes.
+
+After this, I entered the files that were modified C files and used the vc-diff command to see the changes. I would
+go to each next hunk using M-n and revert the changes using C-u C-c C-a. I made sure to only revert the changes that
+were inside comments and not change any actual source code. The changes were essentially all just switching `s to 's.
+
+10)
+
+After this, I viewed the rejected c files using emacs and took snapshots of them and went through the diff.c and diff3.c files 
+by hand to change the discrepancies. The noted lines in the code were incorrect much of the time, probably why they
+were rejected. I had to look around the general area for the lines. I essentially changed a couple occurrences of ` to '.
+
+11)
+
+I used the git status command to see which files were altered and recieved the following output.
+
+HEAD detached at v3.0
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   src/cmp.c
+	modified:   src/diff.c
+	modified:   src/diff3.c
+	modified:   src/dir.c
+	modified:   src/sdiff.c
+	modified:   src/util.c
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	NEWS.orig
+	README-hacking.orig
+	README-hacking.rej
+	README.orig
+	README.rej
+	cfg.mk.orig
+	cfg.mk.rej
+	git-log.txt
+	git-tags.txt
+	ms/config.site.orig
+	quote-patch.txt
+	src/cmp.c.orig
+	src/context.c.orig
+	src/diff.c.orig
+	src/diff.c.rej
+	src/diff.h.orig
+	src/diff3.c.orig
+	src/diff3.c.rej
+	src/dir.c.orig
+	src/sdiff.c.orig
+	src/system.h.orig
+	src/util.c.orig
+	tests/help-version.orig
+
+11)
+
+After this, I used git clean -f to take out the untracked files. It gave me this output.
+
+Removing NEWS.orig
+Removing README-hacking.orig
+Removing README-hacking.rej
+Removing README.orig
+Removing README.rej
+Removing cfg.mk.orig
+Removing cfg.mk.rej
+Removing git-log.txt
+Removing git-tags.txt
+Removing ms/config.site.orig
+Removing quote-patch.txt
+Removing src/cmp.c.orig
+Removing src/context.c.orig
+Removing src/diff.c.orig
+Removing src/diff.c.rej
+Removing src/diff.h.orig
+Removing src/diff3.c.orig
+Removing src/diff3.c.rej
+Removing src/dir.c.orig
+Removing src/sdiff.c.orig
+Removing src/system.h.orig
+Removing src/util.c.orig
+
+12)
+
+I then used git status again, which output 6 files as expected.
+
+HEAD detached at v3.0
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   src/cmp.c
+	modified:   src/diff.c
+	modified:   src/diff3.c
+	modified:   src/dir.c
+	modified:   src/sdiff.c
+	modified:   src/util.c
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+After this, I used the git diff > quote-3.0-patch.txt and used emacs to examine the patch file, which was
+327 lines which is as expected.
+
+13)
+
+I then followed the README-hacking process. I first ran ./bootstrap, then applied the patch from the website, as 
+I did run the previous commands on the lnxsrv09. I then used ./configure then make and make check. I then verified that 
+diff was doing the right thing with diff . - and diff --help, as the ` character was switched to a ' in the words.
+
+14)
+
+I first cloned the original repository using git clone into the 
+
+git clone https://git.savannah.gnu.org/git/diffutils.git diffutilsOG
+
+Then I cd'd into this directory and checked out using the following command.
+
+git checkout v3.0
+
+After this I created the directoried of source code. 
+
+cp -r diffutils/src/*.c diffutils-3.0-patch
+cp -r diffutilsOG/src/*.c diffutils-3.0
+
+Then I used the following command to get the difference.
+
+diffutils/src/diff -pru diffutils-3.0 diffutils-3.0-patch > quote-3.0-test.txt
+
+When i compared this to quote-3.0-patch.txt using the diff command, there were slight differences. However,
+after examining the diff file, I noticed that the changes were pretty insignificant and were only due to
+different paths or positioning. Thus, I would say the changes were innocuous. 
+
+
+
+
+
+
+
