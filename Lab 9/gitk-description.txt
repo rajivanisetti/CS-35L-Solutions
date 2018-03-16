@@ -1,0 +1,17 @@
+The following is a description of each window within the overall window given by the gitk command.
+
+Top Left: This window is a list of all the branches, merges, and commits of the repository with the most recent at
+the top. It almost acts as a log for the repository.
+
+Top Middle: This is the user info of whomever was responsible for each of the actions taken from the top left
+window within the same line.
+
+Top Right: This is simply a time stamp of when the action was taken by the user at the same line.
+
+Middle: There is an SHA1 number for the commit that is chosen by the user running the gitk command. 
+
+Bottom Left: This is the ChangeLog for the selected commit along with information of the user who committed and 
+some more information about the commit.
+
+Bottom Right: This window shows the files that were altered by the commit.
+
