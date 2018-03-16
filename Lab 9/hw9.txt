@@ -1,0 +1,111 @@
+1)
+
+N/A
+
+2)
+
+The first thing I did was checkout version 3.0 of Diffutils from my repository and name the new branch "quote".
+I used the following commands.
+
+cd diffutils
+git checkout -b 'quote' 'v3.0'
+
+3)
+
+I then applied the patch using the following command.
+
+patch -p1 < quote-3.0-patch.txt
+
+At first, I recieved some weird output along the lines of the following.
+
+"patching file src/cmp.c
+Reversed (or previously applied) patch detected! Assume -R? [n]"
+
+I was confused by this, but found that the solution was simply to delete the branch and recheck out the branch again.
+After, I tried again and it worked succesfully where I received this output.
+
+patching file src/cmp.c
+patching file src/diff.c
+patching file src/diff3.c
+patching file src/dir.c
+patching file src/sdiff.c
+patching file src/util.c
+
+4/5)
+
+I learned how to use the "add-change-log-entry-other-window" function then proceeded to make my ChangeLog.
+
+I manually went into each file listed above using emacs and used the C-x 4 a command to create a ChangeLog entry
+for each. At the end it looked like the following.
+
+2018-03-16  Rajiv Anisetti  <rajiv@lnxsrv09.seas.ucla.edu>
+
+	* src/cmp.c: Changed incorrect quote to standard quote
+
+	* src/diff.c: Changed incorrect quote to standard quote
+
+	* src/diff3.c: Changed incorrect quote to standard quote
+
+	* src/dir.c: Changed incorrect quote to standard quote
+
+	* src/sdiff.c: Changed incorrect quote to standard quote
+
+	* src/util.c: Changed incorrect quote to standard quote
+
+6) After this, I commit the changes to the branch with the ChangeLog as the message. I used the following commands.
+
+git add .
+git commit -F ChangeLog
+
+I made sure that my changes were added using the git log command, which showed my commit with the ChangeLog I just created.
+
+7)
+
+I used the following command to create formatted-patch.txt.
+
+git format-patch -1 --stdout > formatted-patch.txt
+
+8)
+
+The partner that I worked with on this lab was Raymond Kwan (Lab 1). I made a new branch named "raymond" using the following
+command:
+
+git checkout -b 'raymond' 'v3.0'
+
+Then, I applied his patch using the following command.
+
+git am ray-formatted-patch.txt
+
+At this point, I followed the instructions from README.hacking, but the make check command gave the following error.
+
+/bin/sh: /bin/sh: cannot execute binary file
+make[3]: *** [Makefile:1309: basic.log] Error 126
+make[3]: Leaving directory '/w/home.11/cs/ugrad/rajiv/diffutils/tests'
+make[2]: *** [Makefile:1291: check-TESTS] Error 2
+make[2]: Leaving directory '/w/home.11/cs/ugrad/rajiv/diffutils/tests'
+make[1]: *** [Makefile:1403: check-am] Error 2
+make[1]: Leaving directory '/w/home.11/cs/ugrad/rajiv/diffutils/tests'
+make: *** [Makefile:1017: check-recursive] Error 1
+
+I looked on Piazza and found this was a recurring problem amongst my fellow students and used the method described by another student,
+where I modified the Makefile.am file (took out the phrase "shell_or_perl_") and used the "chmod +x tests/binary tests/no-newline-at-eof"
+command before running ./bootstrap. I followed the README.hacking after this, making sure to apply Eggert's patch as well and my make check
+worked correctly. 
+
+I then tested to see that the patch was applied by running the same commands from before, "./src/diff . -" and "./src/diff --help".
+In both cases, the single quote was fixed and the patch was applied correctly. I also tried the same previous steps with my own file,
+as did Raymond and the same results occurred. However, when i applied the patch using the git am command, I received some warnings about
+whitespace. After looking these up, I found it was simply a warning and did not truly affect the patch. 
+
+9) 
+
+I then used the "make distdir" command to make sure my ChangeLog was correct.
+
+I navigated to the newly made directory, diffutils-3.0.1-192a-dirty and checked the ChangeLog using emacs. My commit was at the top,
+indicating it was correct.
+
+10)
+
+At this point, I made sure to log out and ssh back into the lnxsrv using the -X server, as I saw on Piazza that this was the only 
+way to use the gitk command in some scenarios. From here, I cd'd into ~eggert/src/gnu/emacs and ran the gitk command. The window came
+up and the rest will be explained in the attached files. 
